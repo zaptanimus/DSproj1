@@ -1,8 +1,8 @@
-#username - complete info
-#id1      - complete info 
-#name1    - complete info 
-#id2      - complete info
-#name2    - complete info  
+#username - matantalvi
+#id1      - 318903028
+#name1    - Matan Talvi 
+#id2      - 208935312
+#name2    - Yaron Reuben Ittah
 
 
 
@@ -14,12 +14,13 @@ class AVLNode(object):
 	@type value: str
 	@param value: data of your node
 	"""
-	def __init__(self, value):
+	def __init__(self, value = None):
 		self.value = value
 		self.left = None
 		self.right = None
 		self.parent = None
 		self.height = -1 # Balance factor
+		self.sizeNode = 0
 		
 
 	"""returns the left child
@@ -27,7 +28,7 @@ class AVLNode(object):
 	@returns: the left child of self, None if there is no left child
 	"""
 	def getLeft(self):
-		return None
+		return self.left
 
 
 	"""returns the right child
@@ -36,7 +37,7 @@ class AVLNode(object):
 	@returns: the right child of self, None if there is no right child
 	"""
 	def getRight(self):
-		return None
+		return self.right
 
 	"""returns the parent 
 
@@ -44,7 +45,7 @@ class AVLNode(object):
 	@returns: the parent of self, None if there is no parent
 	"""
 	def getParent(self):
-		return None
+		return self.parent
 
 	"""return the value
 
@@ -52,7 +53,7 @@ class AVLNode(object):
 	@returns: the value of self, None if the node is virtual
 	"""
 	def getValue(self):
-		return None
+		return self.value
 
 	"""returns the height
 
@@ -60,7 +61,15 @@ class AVLNode(object):
 	@returns: the height of self, -1 if the node is virtual
 	"""
 	def getHeight(self):
-		return -1
+		return self.height
+
+	"""returns the size
+
+	@rtype: int
+	@returns: the size of self, 0 if the node is virtual
+	"""
+	def getSizeNode(self):
+		return self.sizeNode
 
 	"""sets left child
 
@@ -68,7 +77,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def setLeft(self, node):
-		return None
+		self.left=node
 
 	"""sets right child
 
@@ -76,7 +85,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def setRight(self, node):
-		return None
+		self.right=node
 
 	"""sets parent
 
@@ -84,7 +93,7 @@ class AVLNode(object):
 	@param node: a node
 	"""
 	def setParent(self, node):
-		return None
+		self.parent = node
 
 	"""sets value
 
@@ -92,7 +101,7 @@ class AVLNode(object):
 	@param value: data
 	"""
 	def setValue(self, value):
-		return None
+		self.value = value
 
 	"""sets the balance factor of the node
 
@@ -100,7 +109,15 @@ class AVLNode(object):
 	@param h: the height
 	"""
 	def setHeight(self, h):
-		return None
+		self.height = h
+
+	"""sets the size of the node
+
+	@type n: int
+	@param n: the height
+	"""
+	def setSizeNode(self, n):
+		self.sizeNode = n
 
 	"""returns whether self is not a virtual node 
 
@@ -108,9 +125,28 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def isRealNode(self):
-		return False
+		if self.setHeight == -1:
+			return False
+		return True
 
+	"""calculate the BF of the current node 
 
+	@rtype: int
+	@returns: the balance factor of the node.
+	"""
+	def getBF(self):
+		return self.left.getHeight() - self.right.getHeight()
+
+	""" updates node height by computing it from childrens' height
+	"""
+	def updateHeight(self):
+		self.setHeight(max(self.getRight().getHeight(),
+                           self.getLeft().getHeight()) + 1)
+
+	"""updates node size by computing it from childrens' size
+    """
+	def updateSize(self):
+		self.setSize(self.getRight().getSize() + self.getLeft().getSize() + 1)
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -125,6 +161,8 @@ class AVLTreeList(object):
 	def __init__(self):
 		self.size = 0
 		self.root = None
+		self.firstItem = None
+		self.lastItem = None
 		# add your fields here
 
 
@@ -134,7 +172,9 @@ class AVLTreeList(object):
 	@returns: True if the list is empty, False otherwise
 	"""
 	def empty(self):
-		return None
+		if self.root == None:
+			return True
+		return False
 
 
 	"""retrieves the value of the i'th item in the list
@@ -204,7 +244,7 @@ class AVLTreeList(object):
 	@returns: the size of the list
 	"""
 	def length(self):
-		return None
+		return self.size
 
 	"""sort the info values of the list
 
