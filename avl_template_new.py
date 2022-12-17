@@ -94,6 +94,25 @@ class AVLNode(object):
 	def setParent(self, node):
 		self.parent = node
 
+    """ sets right child and also sets right child's parent
+        @type child: AVLnode
+        @param child: a node
+     """
+
+    def setRightParent(self, child):
+        self.setRight(child)
+        child.setParent(self)
+
+    """ sets left child and also sets left child's parent
+        @type child: AVLnode
+        @param child: a node
+     """
+
+    def setLeftParent(self, child):
+        self.setLeft(child)
+        child.setParent(self)
+
+
 	"""sets value
 
 	@type value: str
@@ -199,7 +218,42 @@ class AVLTreeList(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def insert(self, i, val):
-		return -1
+		node = AVLNode(val)
+		
+		if i == 0:
+			if self.empty():
+				self.root = node
+				node.setLeftParent(AVLNode())
+				node.setRightParent(AVLNode())
+				self.lastItem = node
+				self.firstItem = node
+
+			else:
+				if self.firstItem == None:
+					insertLeaf(self.findMin(), node, "left")
+				else:
+					insertLeaf(self.firstItem, node, "left")
+					self.firstItem = node
+
+		elif i == self.length():  # inserting the maximum
+			if self.lastItem == None:
+				insertLeaf(self.findMax(), node, "right")
+			else:
+				insertLeaf(self.lastItem, node, "right")
+				self.lastItem = node
+
+		else:
+			curr = self.treeSelect(i+1)
+			if not curr.getLeft().isRealNode():
+				insertLeaf(curr, node, "left")
+			else:
+				insertLeaf(self.getPredecessorOf(curr), node, "right")
+
+		curr, balance = fixInsert(node)
+		if curr != None:
+			self.updateSizeAllTheWayUpFrom(curr.getParent())
+
+		return balance
 
 
 	"""deletes the i'th item in the list
@@ -303,7 +357,7 @@ class AVLTreeList(object):
 			return None
 		return self.root
 
-### service functions
+### service functions###
 
 	"""returns the smallest node in the tree whose subtree of size >= k
     @type k: int
@@ -343,16 +397,15 @@ class AVLTreeList(object):
 			currSize = curr.getLeft().getSize() + 1
 		return curr
 
-
 	"""returns the successor of a given node
-    @type node: AVLNode
+	@type node: AVLNode
 	@rtype: AVLNode
 	@returns: the successor of a given node. if the node is the Maximum returns None
 	"""
 
 	def mySuccessor(self, node):
-        if self.lastItem == node:
-            return None
+		if self.lastItem == node:
+			return None
 
         if node.getRight().isRealNode():
             subTree = AVLTreeList()
@@ -371,7 +424,7 @@ class AVLTreeList(object):
 	@returns: the predecessor of a given node. if the node is the minimum returns None
 	"""
 
-    def myPredecessor(self, node):
+	def myPredecessor(self, node):
         if node == self.firstItem:
             return None
         if node.getLeft().isRealNode():
@@ -384,6 +437,33 @@ class AVLTreeList(object):
             curr = curr.getParent
         return curr
 
+
+	"""
+	returns the node which contains the last item in the AVLtreelist. if empty returns None.
+	@rtype: AVLNode
+	"""
+
+	def findMax(self):
+		traveler = self.getRoot()
+		if traveler == None:
+			return None
+		while(traveler.getRight().isRealNode()):
+			traveler = traveler.getRight()
+		return traveler
+
+	"""
+	returns the node which contains the first item in the AVLtreelist. if empty returns None.
+	@rtype: AVLNode
+	"""
+
+	def findMin(self):
+		traveler = self.getRoot()
+		if traveler == None:
+			return None
+		while (traveler.getLeft().isRealNode()):
+			traveler = traveler.getLeft()
+		return traveler
+
     """rotates a node with BF = +2 and its left son has BF = +1,
     fixes the Bf of node, updating the height and size fields of the nodes involved
 		@type node: AVLNode
@@ -392,7 +472,7 @@ class AVLTreeList(object):
         @returns: None
 	"""
 
-    def rightRotation(self, node):
+	def rightRotation(self, node):
         B = node
         parent = B.getParent()
         A = B.getLeft()
@@ -423,7 +503,7 @@ class AVLTreeList(object):
         @returns: None
 	"""
 
-    def leftRotation(self, node):
+	def leftRotation(self, node):
         B = node
         parent = B.getParent()
         A = B.getRight()
@@ -444,28 +524,60 @@ class AVLTreeList(object):
         B.updateSize()
         A.updateSize()
 
-        """performs rotation on AVL subtree with all cases as shown in class
-            @type node: AVLNode
-            @param node: the root of the AVL subtree
-            @rtype : int
-            @returns: number of rebalancing operation that has been done
+		"""performs rotation on AVL subtree with all cases as shown in class
+		@type node: AVLNode
+		@param node: the root of the AVL subtree
+		@rtype : int
+		@returns: number of rebalancing operation that has been done
+		"""
+
+	def insertCases(node):
+		if node.getBf() == -2:
+			if node.getRight().getBf() == -1:
+				self.leftRotation(node)
+				return 1
+			else:
+				self.rightRotation(node.getRight())
+				self.leftRotation(node)
+				return 2
+
+		else:
+			if node.getLeft().getBf() == 1:
+				self.rightRotation(node)
+				return 1
+			else:
+				self.leftRotation(node.getLeft())
+				self.rightRotation(node)
+				return 2
+
+        """travels from the inserted node to root, updating size and height while traveling.
+        @type node: AVLNode
+        @param node: inserted node
+        @rtype: tuple
+        @returns: tuple which its first object is the last node it checked
+                 and second object is number of rebalancing operations that has been done
         """
 
-        def insertCases(node):
-            if node.getBf() == -2:
-                if node.getRight().getBf() == -1:
-                    self.leftRotation(node)
-                    return 1
-                else:
-                    self.rightRotation(node.getRight())
-                    self.leftRotation(node)
-                    return 2
+        def fixInsert(node):
+            node.updateHeight()
+            node.updateSize()
+            curr = node.getParent()
+            balancer = 0
 
-            else:
-                if node.getLeft().getBf() == 1:
-                    self.rightRotation(node)
-                    return 1
+            while curr != None:
+                curr.updateSize()
+                prevHeight = curr.getHeight()
+                curr.updateHeight()
+
+                if abs(curr.getBf()) < 2:
+                    if prevHeight == curr.getHeight():
+                        return (curr, balancer)
+                    else:
+                        curr = curr.getParent()
+                        balancer += 1
+
                 else:
-                    self.leftRotation(node.getLeft())
-                    self.rightRotation(node)
-                    return 2
+                    balancer += insertCases(curr)
+                    return (curr, balancer)
+
+            return (curr, balancer)
