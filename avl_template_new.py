@@ -94,23 +94,23 @@ class AVLNode(object):
 	def setParent(self, node):
 		self.parent = node
 
-    """ sets right child and also sets right child's parent
-        @type child: AVLnode
-        @param child: a node
-     """
+	""" sets right child and also sets right child's parent
+		@type child: AVLnode
+		@param child: a node
+	"""
 
-    def setRightParent(self, child):
-        self.setRight(child)
-        child.setParent(self)
+	def setRightParent(self, child):
+		self.setRight(child)
+		child.setParent(self)
 
-    """ sets left child and also sets left child's parent
-        @type child: AVLnode
-        @param child: a node
-     """
+	""" sets left child and also sets left child's parent
+		@type child: AVLnode
+		@param child: a node
+	"""
 
-    def setLeftParent(self, child):
-        self.setLeft(child)
-        child.setParent(self)
+	def setLeftParent(self, child):
+		self.setLeft(child)
+		child.setParent(self)
 
 
 	"""sets value
@@ -159,10 +159,10 @@ class AVLNode(object):
 	"""
 	def updateHeight(self):
 		self.setHeight(max(self.getRight().getHeight(),
-                           self.getLeft().getHeight()) + 1)
+						self.getLeft().getHeight()) + 1)
 
 	"""updates node size by computing it from childrens' size
-    """
+	"""
 	def updateSize(self):
 		self.setSize(self.getRight().getSize() + self.getLeft().getSize() + 1)
 
@@ -207,8 +207,7 @@ class AVLTreeList(object):
 			return None
 		return self.treeSelect(i+1).getValue()
 
-	"""inserts val at position i in the list
-
+	"""inserts val at position i in the list 
 	@type i: int
 	@pre: 0 <= i <= self.length()
 	@param i: The intended index in the list to which we insert val
@@ -230,28 +229,28 @@ class AVLTreeList(object):
 
 			else:
 				if self.firstItem == None:
-					insertLeaf(self.findMin(), node, "left")
+					self.insertLeaf(self.findMin(), node, "left")
 				else:
-					insertLeaf(self.firstItem, node, "left")
+					self.insertLeaf(self.firstItem, node, "left")
 					self.firstItem = node
 
-		elif i == self.length():  # inserting the maximum
+		elif i == self.length():
 			if self.lastItem == None:
-				insertLeaf(self.findMax(), node, "right")
+				self.insertLeaf(self.findMax(), node, "right")
 			else:
-				insertLeaf(self.lastItem, node, "right")
+				self.insertLeaf(self.lastItem, node, "right")
 				self.lastItem = node
 
 		else:
 			curr = self.treeSelect(i+1)
 			if not curr.getLeft().isRealNode():
-				insertLeaf(curr, node, "left")
+				self.insertLeaf(curr, node, "left")
 			else:
-				insertLeaf(self.getPredecessorOf(curr), node, "right")
+				self.insertLeaf(self.getPredecessorOf(curr), node, "right")
 
-		curr, balance = fixInsert(node)
+		curr, balance = self.fixInsert(node)
 		if curr != None:
-			self.updateSizeAllTheWayUpFrom(curr.getParent())
+			self.fixSizeUp(curr.getParent())
 
 		return balance
 
@@ -294,7 +293,15 @@ class AVLTreeList(object):
 	@returns: a list of strings representing the data structure
 	"""
 	def listToArray(self):
-		return None
+		def recListToArray(node, arr):
+			if node.isRealNode():
+				recListToArray(node.getLeft(), arr)
+				arr.append(node.getValue())
+				recListToArray(node.getRight(), arr)
+		
+		arr = []
+		recListToArray(self.getRoot(),arr)
+		return arr
 
 	"""returns the size of the list 
 
@@ -302,7 +309,9 @@ class AVLTreeList(object):
 	@returns: the size of the list
 	"""
 	def length(self):
-		return self.size
+		if self.empty():
+			return 0
+		return self.getRoot().getSizeNode()
 
 	"""sort the info values of the list
 
@@ -360,11 +369,11 @@ class AVLTreeList(object):
 ### service functions###
 
 	"""returns the smallest node in the tree whose subtree of size >= k
-    @type k: int
-    @pre: 1 <= k <= self.length()
-    @rtype: AVLNode
-    @returns: the smallest node off size >= k
-    """
+	@type k: int
+	@pre: 1 <= k <= self.length()
+	@rtype: AVLNode
+	@returns: the smallest node off size >= k
+	"""
 
 	def subTreeOfSizeK(self, k):
 		curr = self.firstItem
@@ -373,12 +382,12 @@ class AVLTreeList(object):
 		return curr
 
 	"""returns the i'th smallest node in the tree
-    @type i: int
-    @pre: 1 <= i <= self.length()
-    @param i: a position in the tree
-    @rtype: AVLNode
-    @returns: the i'th smallest node in the tree
-    """
+	@type i: int
+	@pre: 1 <= i <= self.length()
+	@param i: a position in the tree
+	@rtype: AVLNode
+	@returns: the i'th smallest node in the tree
+	"""
 	def treeSelect(self, i):
 		if i == 1:
 			return self.firstItem
@@ -407,36 +416,35 @@ class AVLTreeList(object):
 		if self.lastItem == node:
 			return None
 
-        if node.getRight().isRealNode():
-            subTree = AVLTreeList()
-            subTree.root = node.getRight()
-            return subTree.findMin()
+		if node.getRight().isRealNode():
+			subTree = AVLTreeList()
+			subTree.root = node.getRight()
+			return subTree.findMin()
 
-        curr = node.getParent()
-        while (curr != None) and (curr.getRight() == node):
-            node = curr
-            curr = curr.getParent()
-        return curr
+		curr = node.getParent()
+		while (curr != None) and (curr.getRight() == node):
+			node = curr
+			curr = curr.getParent()
+		return curr
 
-    """returns the predecessor of a given node
-    @type node: AVLNode
+	"""returns the predecessor of a given node
+	@type node: AVLNode
 	@rtype: AVLNode
 	@returns: the predecessor of a given node. if the node is the minimum returns None
 	"""
 
 	def myPredecessor(self, node):
-        if node == self.firstItem:
-            return None
-        if node.getLeft().isRealNode():
-            subTree = AVLTreeList()
-            subTree.root = node.getLeft()
-            return subTree.findMax()
+		if node == self.firstItem:
+			return None
+		if node.getLeft().isRealNode():
+			subTree = AVLTreeList()
+			subTree.root = node.getLeft()
+			return subTree.findMax()
 
-        curr = node.getParent()
-        while (curr != None) and (curr.getLeft() == node):
-            curr = curr.getParent
-        return curr
-
+		curr = node.getParent()
+		while (curr != None) and (curr.getLeft() == node):
+			curr = curr.getParent
+		return curr
 
 	"""
 	returns the node which contains the last item in the AVLtreelist. if empty returns None.
@@ -464,65 +472,65 @@ class AVLTreeList(object):
 			traveler = traveler.getLeft()
 		return traveler
 
-    """rotates a node with BF = +2 and its left son has BF = +1,
-    fixes the Bf of node, updating the height and size fields of the nodes involved
+	"""rotates a node with BF = +2 and its left son has BF = +1,
+	fixes the Bf of node, updating the height and size fields of the nodes involved
 		@type node: AVLNode
-        @param node: starting point of rotation
-        @rtype : None
-        @returns: None
+		@param node: starting point of rotation
+		@rtype : None
+		@returns: None
 	"""
 
 	def rightRotation(self, node):
-        B = node
-        parent = B.getParent()
-        A = B.getLeft()
-        if parent != None:
-            if parent.getLeft() == B:
-                parent.setLeft(A)
-            else:
-                parent.setRight(A)
-        else:
-            self.root = A
-        A.setParent(parent)
-        B.setParent(A)
-        B.setLeft(A.getRight())
-        A.setRight(B)
-        B.getLeft().setParent(B)
+		B = node
+		parent = B.getParent()
+		A = B.getLeft()
+		if parent != None:
+			if parent.getLeft() == B:
+				parent.setLeft(A)
+			else:
+				parent.setRight(A)
+		else:
+			self.root = A
+		A.setParent(parent)
+		B.setParent(A)
+		B.setLeft(A.getRight())
+		A.setRight(B)
+		B.getLeft().setParent(B)
 
-        B.updateHeight()
-        A.updateHeight()
+		B.updateHeight()
+		A.updateHeight()
 
-        B.updateSize()
-        A.updateSize()
+		B.updateSize()
+		A.updateSize()
 
-    """rotates a node with BF = -2 and its left son has BF = -1,
-    fixes the Bf of node, updating the height and size fields of the nodes involved
-	    @type node: AVLNode
-        @param node: starting point of rotation
-        @rtype : None
-        @returns: None
+	"""rotates a node with BF = -2 and its left son has BF = -1,
+	fixes the Bf of node, updating the height and size fields of the nodes involved
+		@type node: AVLNode
+		@param node: starting point of rotation
+		@rtype : None
+		@returns: None
 	"""
 
 	def leftRotation(self, node):
-        B = node
-        parent = B.getParent()
-        A = B.getRight()
-        if parent == None:
-            self.root = A
-            A.setParent(None)
-        else:
-            if parent.getLeft() == B:
-                parent.completeSetLeft(A)
-            else:
-                parent.completeSetRight(A)
-        B.completeSetRight(A.getLeft())
-        A.completeSetLeft(B)
+		B = node
+		parent = B.getParent()
+		A = B.getRight()
+		if parent == None:
+			self.root = A
+			A.setParent(None)
+		else:
+			if parent.getLeft() == B:
+				parent.completeSetLeft(A)
+			else:
+				parent.completeSetRight(A)
+		B.completeSetRight(A.getLeft())
+		A.completeSetLeft(B)
 
-        B.updateHeight()
-        A.updateHeight()
+		B.updateHeight()
+		A.updateHeight()
 
-        B.updateSize()
-        A.updateSize()
+		B.updateSize()
+		A.updateSize()
 
 		"""performs rotation on AVL subtree with all cases as shown in class
 		@type node: AVLNode
@@ -531,7 +539,14 @@ class AVLTreeList(object):
 		@returns: number of rebalancing operation that has been done
 		"""
 
-	def insertCases(node):
+	"""performs rotation on AVL criminal subtree so that self will be legal AVL tree
+		@type node: AVLNode
+		@param node: the root of the AVL criminal subtree
+		@rtype : int
+		@returns: number of rebalancing operation that has been done
+	"""
+
+	def insertCases(self, node):
 		if node.getBf() == -2:
 			if node.getRight().getBf() == -1:
 				self.leftRotation(node)
@@ -550,34 +565,67 @@ class AVLTreeList(object):
 				self.rightRotation(node)
 				return 2
 
-        """travels from the inserted node to root, updating size and height while traveling.
-        @type node: AVLNode
-        @param node: inserted node
-        @rtype: tuple
-        @returns: tuple which its first object is the last node it checked
-                 and second object is number of rebalancing operations that has been done
-        """
+	"""travels from the inserted node to root, updating size and height while traveling.
+	@type node: AVLNode
+	@param node: inserted node
+	@rtype: tuple
+	@returns: tuple which its first object is the last node it checked
+			and second object is number of rebalancing operations that has been done
+	"""
 
-        def fixInsert(node):
-            node.updateHeight()
-            node.updateSize()
-            curr = node.getParent()
-            balancer = 0
+	def fixInsert(self, node):
+			node.updateHeight()
+			node.updateSize()
+			curr = node.getParent()
+			balancer = 0
 
-            while curr != None:
-                curr.updateSize()
-                prevHeight = curr.getHeight()
-                curr.updateHeight()
+			while curr != None:
+				curr.updateSize()
+				prevHeight = curr.getHeight()
+				curr.updateHeight()
 
-                if abs(curr.getBf()) < 2:
-                    if prevHeight == curr.getHeight():
-                        return (curr, balancer)
-                    else:
-                        curr = curr.getParent()
-                        balancer += 1
+				if abs(curr.getBf()) < 2:
+					if prevHeight == curr.getHeight():
+						return (curr, balancer)
+					else:
+						curr = curr.getParent()
+						balancer += 1
 
-                else:
-                    balancer += insertCases(curr)
-                    return (curr, balancer)
+				else:
+					balancer += self.insertCases(curr)
+					return (curr, balancer)
 
-            return (curr, balancer)
+			return (curr, balancer)
+
+	"""inserts node as a leaf without making any height or size adjustments.
+	the adjustments will be done in insert function
+	@type currLeaf: AVLNode
+	@param currLeaf: the leaf that we want to insert a new son to
+	@type newLeaf: AVLNode
+	@param newLeaf: the node that we want to insert as a new leaf
+	@type direction: string
+	@param direction: indicates if newLeaf will be the left or right son of currLeaf
+	@pre: direction = "left" or direction = "right"
+	"""
+
+	def insertLeaf(self,currLeaf, newLeaf, direction):
+		if direction == "right":  # insert newLeaf as right son of currLeaf
+			virtualSon = currLeaf.getRight()
+			currLeaf.completeSetRight(newLeaf)
+		else:  # insert newLeaf as left son of currLeaf
+			virtualSon = currLeaf.getLeft()
+			currLeaf.completeSetLeft(newLeaf)
+
+		newLeaf.completeSetRight(virtualSon)
+		newLeaf.completeSetLeft(AVLNode())
+
+
+	"""
+	updating the size of all the nodes which are in the path from node to the root
+	@type node: AVLNode
+	"""
+
+	def fixSizeUp(self, node):
+		while (node != None):
+			node.updateSize()
+			node = node.getParent()
