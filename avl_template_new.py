@@ -337,7 +337,16 @@ class AVLTreeList(object):
 	@returns: the absolute value of the difference between the height of the AVL trees joined
 	"""
 	def concat(self, lst):
-		return None
+		deltaHeight = abs(self.getTreeHeight() - lst.getTreeHeight())
+		if self.empty():
+			self.firstItem = lst.firstItem
+			self.lastItem = lst.lastItem
+			self.root = lst.getRoot()
+		else:
+			selfMaxi = self.lastItem
+			self.delete(self.length()-1)
+			self.join(selfMaxi, lst)
+		return deltaHeight
 
 	"""searches for a *value* in the list
 
@@ -629,3 +638,74 @@ class AVLTreeList(object):
 		while (node != None):
 			node.updateSize()
 			node = node.getParent()
+
+	"""
+	returns the height of the tree, -1 if empty
+	@rtype: int
+	"""
+	def getTreeHeight(self):
+		if self.empty():
+			return -1
+		else:
+			return self.getRoot().getHeight()
+
+
+	"""
+	inserts val at the end of the list
+	@param val: the value we insert to the end of the list
+	@rtype: int
+	@returns: the number of rebalancing operation due to AVL rebalancing
+	@complexity: O(logn)
+	"""
+
+	def append(self, val):
+		return self.insert(self.length(), val)
+
+
+	"""merges two AVL trees
+	@type connector: AVL node
+	@type T2: AVL tree
+	@pre connector.isRealNode()
+	@complexity: O(abs(self.getTreeHeight() - L2.getTreeHeight()) + 1)
+	"""
+
+	def join(self, connector, T2):
+		if T2.empty():
+			self.append(connector.getValue())
+			return
+		elif self.empty():
+			T2.insert(0, connector.getValue())
+			self.firstItem = T2.firstItem
+			self.lastItem = T2.lastItem
+			self.root = T2.getRoot()
+			return
+
+		elif self.getRoot().getHeight() == T2.getRoot().getHeight():
+			connector.completeSetLeft(self.getRoot())
+			connector.completeSetRight(T2.getRoot())
+			connector.setParent(None)
+			self.root = connector
+
+		elif self.getRoot().getHeight() < T2.getRoot().getHeight():
+			curr = T2.getRoot()
+			while curr.getHeight() > self.getRoot().getHeight():
+				curr = curr.getLeft()
+			currParent = curr.getParent()
+			connector.completeSetLeft(self.getRoot())
+			connector.completeSetRight(curr)
+			currParent.completeSetLeft(connector)
+			self.root = T2.getRoot()
+
+		else:
+			curr = self.getRoot()
+			while curr.getHeight() > T2.getRoot().getHeight():
+				curr = curr.getRight()
+			currParent = curr.getParent()
+			connector.completeSetLeft(curr)
+			connector.completeSetRight(T2.getRoot())
+			currParent.completeSetRight(connector)
+		self.lastItem = T2.lastItem
+		connector.updateSize()
+		connector.updateHeight()
+		if self.getRoot() != connector:
+			self.fixTreeAfterDeletionAndJoin(connector.getParent())
