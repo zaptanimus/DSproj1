@@ -1,10 +1,10 @@
 #username - yaronreunbeni
 #id1      - 208935312
 #name1    - Yaron Reuben Ittah
-#id2      - 11111111
-#name2    - username
+#id2      - complete info
+#name2    - complete info
 
-
+import random
 
 """A class represnting a node in an AVL tree"""
 
@@ -21,7 +21,6 @@ class AVLNode(object):
 		self.parent = None
 		self.height = -1 # Balance factor
 		self.sizeNode = 0
-		
 
 	"""returns the left child
 	@rtype: AVLNode
@@ -62,13 +61,21 @@ class AVLNode(object):
 	def getHeight(self):
 		return self.height
 
-	"""returns the size
+	"""returns the size of node
 
 	@rtype: int
 	@returns: the size of self, 0 if the node is virtual
 	"""
 	def getSizeNode(self):
 		return self.sizeNode
+
+	"""calculate the BF of the current node 
+
+	@rtype: int
+	@returns: the balance factor of the node.
+	"""
+	def getBF(self):
+		return self.left.getHeight() - self.right.getHeight()
 
 	"""sets left child
 
@@ -98,7 +105,6 @@ class AVLNode(object):
 		@type child: AVLnode
 		@param child: a node
 	"""
-
 	def setRightParent(self, child):
 		self.setRight(child)
 		child.setParent(self)
@@ -107,11 +113,9 @@ class AVLNode(object):
 		@type child: AVLnode
 		@param child: a node
 	"""
-
 	def setLeftParent(self, child):
 		self.setLeft(child)
 		child.setParent(self)
-
 
 	"""sets value
 
@@ -121,7 +125,7 @@ class AVLNode(object):
 	def setValue(self, value):
 		self.value = value
 
-	"""sets the balance factor of the node
+	"""sets the height of the node
 
 	@type h: int
 	@param h: the height
@@ -147,24 +151,15 @@ class AVLNode(object):
 			return False
 		return True
 
-	"""calculate the BF of the current node 
-
-	@rtype: int
-	@returns: the balance factor of the node.
-	"""
-	def getBF(self):
-		return self.left.getHeight() - self.right.getHeight()
-
 	""" updates node height by computing it from childrens' height
 	"""
 	def updateHeight(self):
-		self.setHeight(max(self.getRight().getHeight(),
-						self.getLeft().getHeight()) + 1)
+		self.setHeight(max(self.getRight().getHeight(), self.getLeft().getHeight()) + 1)
 
 	"""updates node size by computing it from childrens' size
 	"""
 	def updateSize(self):
-		self.setSize(self.getRight().getSize() + self.getLeft().getSize() + 1)
+		self.setSize(self.getRight().getSizeNode() + self.getLeft().getSizeNode() + 1)
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -182,7 +177,6 @@ class AVLTreeList(object):
 		self.firstItem = None #minimum
 		self.lastItem = None #maximum
 
-
 	"""returns whether the list is empty
 
 	@rtype: bool
@@ -192,7 +186,6 @@ class AVLTreeList(object):
 		if self.root == None:
 			return True
 		return False
-
 
 	"""retrieves the value of the i'th item in the list
 
@@ -253,7 +246,6 @@ class AVLTreeList(object):
 
 		return balance
 
-
 	"""deletes the i'th item in the list
 
 	@type i: int
@@ -264,7 +256,6 @@ class AVLTreeList(object):
 	"""
 	def delete(self, i):
 		return -1
-
 
 	"""returns the value of the first item in the list
 
@@ -318,13 +309,12 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are sorted by the info of the original list.
 	"""
 	def sort(self):
-
+		sortT = AVLTreeList()
 		arr = self.listToArray
 		myHeapSort(arr)
-		sortedT = AVLTreeList()
 		for i in range(len(arr)):
-			sortedT.insert(i,arr[i])
-		return sortedT
+			sortT.insert(i,arr[i])
+		return sortT
 
 	"""permute the info values of the list 
 
@@ -332,9 +322,12 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are permuted randomly by the info of the original list. ##Use Randomness
 	"""
 	def permutation(self):
+		permT = AVLTreeList()
 		arr = self.listToArray
-		arr
-		return None
+		random.shuffle(arr)
+		for i in range(len(arr)):
+			permT.insert(i,arr[i])
+		return permT
 
 	"""concatenates lst to self
 
@@ -390,10 +383,9 @@ class AVLTreeList(object):
 	@rtype: AVLNode
 	@returns: the smallest node off size >= k
 	"""
-
 	def subTreeOfSizeK(self, k):
 		curr = self.firstItem
-		while (curr.getSize() < k):
+		while (curr.getSizeNode() < k):
 			curr = curr.getParent()
 		return curr
 
@@ -411,7 +403,7 @@ class AVLTreeList(object):
 			return self.lastItem
 
 		curr = self.subTreeOfSizeK(i)
-		currSize = curr.getLeft().getSize() + 1
+		currSize = curr.getLeft().getSizeNode() + 1
 		while (i != currSize):
 			if i < currSize:
 				curr = curr.getLeft()
@@ -419,7 +411,7 @@ class AVLTreeList(object):
 			else:
 				curr = curr.getRight()
 				i = i - currSize
-			currSize = curr.getLeft().getSize() + 1
+			currSize = curr.getLeft().getSizeNode() + 1
 		return curr
 
 	"""returns the successor of a given node
@@ -427,7 +419,6 @@ class AVLTreeList(object):
 	@rtype: AVLNode
 	@returns: the successor of a given node. if the node is the Maximum returns None
 	"""
-
 	def mySuccessor(self, node):
 		if self.lastItem == node:
 			return None
@@ -448,7 +439,6 @@ class AVLTreeList(object):
 	@rtype: AVLNode
 	@returns: the predecessor of a given node. if the node is the minimum returns None
 	"""
-
 	def myPredecessor(self, node):
 		if node == self.firstItem:
 			return None
@@ -462,11 +452,10 @@ class AVLTreeList(object):
 			curr = curr.getParent
 		return curr
 
-	"""
-	returns the node which contains the last item in the AVLtreelist. if empty returns None.
+	"""returns the node which contains the last item in the AVLtreelist.
+	if empty returns None.
 	@rtype: AVLNode
 	"""
-
 	def findMax(self):
 		traveler = self.getRoot()
 		if traveler == None:
@@ -475,11 +464,10 @@ class AVLTreeList(object):
 			traveler = traveler.getRight()
 		return traveler
 
-	"""
-	returns the node which contains the first item in the AVLtreelist. if empty returns None.
+	"""	returns the node which contains the first item in the AVLtreelist.
+	if empty returns None.
 	@rtype: AVLNode
 	"""
-
 	def findMin(self):
 		traveler = self.getRoot()
 		if traveler == None:
@@ -495,7 +483,6 @@ class AVLTreeList(object):
 		@rtype : None
 		@returns: None
 	"""
-
 	def rightRotation(self, node):
 		B = node
 		parent = B.getParent()
@@ -526,7 +513,6 @@ class AVLTreeList(object):
 		@rtype : None
 		@returns: None
 	"""
-
 	def leftRotation(self, node):
 		B = node
 		parent = B.getParent()
@@ -561,7 +547,6 @@ class AVLTreeList(object):
 		@rtype : int
 		@returns: number of rebalancing operation that has been done
 	"""
-
 	def insertCases(self, node):
 		if node.getBf() == -2:
 			if node.getRight().getBf() == -1:
@@ -588,7 +573,6 @@ class AVLTreeList(object):
 	@returns: tuple which its first object is the last node it checked
 			and second object is number of rebalancing operations that has been done
 	"""
-
 	def fixInsert(self, node):
 			node.updateHeight()
 			node.updateSize()
@@ -623,7 +607,6 @@ class AVLTreeList(object):
 	@param direction: indicates if newLeaf will be the left or right son of currLeaf
 	@pre: direction = "left" or direction = "right"
 	"""
-
 	def insertLeaf(self,currLeaf, newLeaf, direction):
 		if direction == "right":  # insert newLeaf as right son of currLeaf
 			virtualSon = currLeaf.getRight()
@@ -635,18 +618,15 @@ class AVLTreeList(object):
 		newLeaf.setRightParent(virtualSon)
 		newLeaf.setLeftParent(AVLNode())
 
-	"""
-	updating the size of all the nodes which are in the path from node to the root
+	"""	updating the size of all the nodes which are in the path from node to the root
 	@type node: AVLNode
 	"""
-
 	def fixSizeUp(self, node):
 		while (node != None):
 			node.updateSize()
 			node = node.getParent()
 
-	"""
-	returns the height of the tree, -1 if empty
+	"""	returns the height of the tree, -1 if empty
 	@rtype: int
 	"""
 	def getTreeHeight(self):
@@ -655,20 +635,17 @@ class AVLTreeList(object):
 		else:
 			return self.getRoot().getHeight()
 
-
-	"""
-	inserts val at the end of the list
+	"""	inserts val at the end of the list
 	@param val: the value we insert to the end of the list
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	@complexity: O(logn)
 	"""
-
 	def append(self, val):
 		return self.insert(self.length(), val)
 
 	"""
-	travels from the parrent of the delted node or the parent of the connector to tree's root, 
+	travels from the parent of the deleted node or the parent of the connector to tree's root, 
 	while looking for criminal AVL subtrees and handling the criminals by preforming the rotations needed.
 	for every node in the path to the root, it updates its size and height, if needed.
 	returns the number of rebalancing operation due to AVL rebalancing.
@@ -679,7 +656,6 @@ class AVLTreeList(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing.
 	@complexity: O(h1 - h2 + 1) = O(logn) when h1 is the tree height and h2 is the height of node.
 	"""
-
 	def fixTreeUp(self, node):
 		fixFlag = False
 		balancingCntr = 0
@@ -720,13 +696,12 @@ class AVLTreeList(object):
 
 		return balancingCntr
 
-	"""merges two AVL trees
+	"""merges two AVL trees as shown in class
 	@type connector: AVL node
 	@type T2: AVL tree
 	@pre connector.isRealNode()
 	@complexity: O(abs(self.getTreeHeight() - L2.getTreeHeight()) + 1)
 	"""
-
 	def join(self, connector, T2):
 		if T2.empty():
 			self.append(connector.getValue())
@@ -768,38 +743,7 @@ class AVLTreeList(object):
 		if self.getRoot() != connector:
 			self.fixTreeUp(connector.getParent())
 
-"""Heapsort algorithm using heapify as shown in class
-@type arr: array
-@complexity: O(n log n)
-"""
-
-def myHeapSort(arr):
-	def myHeapify(arr, N, i):
-		largest = i
-		l = 2 * i + 1
-		r = 2 * i + 2
-	
-		if l < N and arr[largest] < arr[l]:
-			largest = l
-		
-		if r < N and arr[largest] < arr[r]:
-			largest = r
-	
-		if largest != i:
-			arr[i], arr[largest] = arr[largest], arr[i]  # swap
-			myHeapify(arr, N, largest)
-
-	N = len(arr)
-
-	for i in range(N//2 - 1, -1, -1):
-		myHeapify(arr, N, i)
-
-	for i in range(N-1, 0, -1):
-		arr[i], arr[0] = arr[0], arr[i]  # swap
-		myHeapify(arr, i, 0)
-
-
-	### PRINT TREE FUNCTIONS ###
+### PRINT TREE FUNCTIONS ###
 
 	def printt(self):
 		out = ""
@@ -877,5 +821,33 @@ def myHeapSort(arr):
 		return i
 
 
+"""Heapsort algorithm using heapify as shown in class
+@type arr: array
+@complexity: O(n log n)
+"""
+def myHeapSort(arr):
+	def myHeapify(arr, N, i):
+		largest = i
+		l = 2 * i + 1
+		r = 2 * i + 2
+	
+		if l < N and arr[largest] < arr[l]:
+			largest = l
+		
+		if r < N and arr[largest] < arr[r]:
+			largest = r
+	
+		if largest != i:
+			arr[i], arr[largest] = arr[largest], arr[i]  # swap
+			myHeapify(arr, N, largest)
+
+	N = len(arr)
+
+	for i in range(N//2 - 1, -1, -1):
+		myHeapify(arr, N, i)
+
+	for i in range(N-1, 0, -1):
+		arr[i], arr[0] = arr[0], arr[i]  # swap
+		myHeapify(arr, i, 0)
 
 			
