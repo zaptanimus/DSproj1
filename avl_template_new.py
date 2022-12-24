@@ -218,7 +218,6 @@ class AVLTreeList(object):
 	"""
 	def insert(self, i, val):
 		node = AVLNode(val)
-		
 		if i == 0:
 			if self.empty():
 				self.root = node
@@ -246,7 +245,7 @@ class AVLTreeList(object):
 			if not curr.getLeft().isRealNode():
 				self.insertLeaf(curr, node, "left")
 			else:
-				self.insertLeaf(self.getPredecessorOf(curr), node, "right")
+				self.insertLeaf(self.myPredecessor(curr), node, "right")
 
 		curr, balance = self.fixInsert(node)
 		if curr != None:
@@ -319,7 +318,12 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are sorted by the info of the original list.
 	"""
 	def sort(self):
-		return None
+
+		arr = self.listToArray
+
+
+
+		return arr
 
 	"""permute the info values of the list 
 
@@ -327,6 +331,8 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are permuted randomly by the info of the original list. ##Use Randomness
 	"""
 	def permutation(self):
+		arr = self.listToArray
+		arr
 		return None
 
 	"""concatenates lst to self
@@ -339,9 +345,9 @@ class AVLTreeList(object):
 	def concat(self, lst):
 		deltaHeight = abs(self.getTreeHeight() - lst.getTreeHeight())
 		if self.empty():
+			self.root = lst.getRoot()
 			self.firstItem = lst.firstItem
 			self.lastItem = lst.lastItem
-			self.root = lst.getRoot()
 		else:
 			selfMaxi = self.lastItem
 			self.delete(self.length()-1)
@@ -529,11 +535,11 @@ class AVLTreeList(object):
 			A.setParent(None)
 		else:
 			if parent.getLeft() == B:
-				parent.completeSetLeft(A)
+				parent.setLeftParent(A)
 			else:
-				parent.completeSetRight(A)
-		B.completeSetRight(A.getLeft())
-		A.completeSetLeft(B)
+				parent.setRightParent(A)
+		B.setRightParent(A.getLeft())
+		A.setLeftParent(B)
 
 		B.updateHeight()
 		A.updateHeight()
@@ -620,14 +626,13 @@ class AVLTreeList(object):
 	def insertLeaf(self,currLeaf, newLeaf, direction):
 		if direction == "right":  # insert newLeaf as right son of currLeaf
 			virtualSon = currLeaf.getRight()
-			currLeaf.completeSetRight(newLeaf)
+			currLeaf.setRightParent(newLeaf)
 		else:  # insert newLeaf as left son of currLeaf
 			virtualSon = currLeaf.getLeft()
-			currLeaf.completeSetLeft(newLeaf)
+			currLeaf.setLeftParent(newLeaf)
 
-		newLeaf.completeSetRight(virtualSon)
-		newLeaf.completeSetLeft(AVLNode())
-
+		newLeaf.setRightParent(virtualSon)
+		newLeaf.setLeftParent(AVLNode())
 
 	"""
 	updating the size of all the nodes which are in the path from node to the root
@@ -661,6 +666,58 @@ class AVLTreeList(object):
 	def append(self, val):
 		return self.insert(self.length(), val)
 
+	"""
+	travels from the parrent of the delted node or the parent of the connector to tree's root, 
+	while looking for criminal AVL subtrees and handling the criminals by preforming the rotations needed.
+	for every node in the path to the root, it updates its size and height, if needed.
+	returns the number of rebalancing operation due to AVL rebalancing.
+	
+	@type node: AVLNode
+	@param node: the parent of the deleted node or the parent of the connector
+	@rtype: int
+	@returns: the number of rebalancing operation due to AVL rebalancing.
+	@complexity: O(h1 - h2 + 1) = O(logn) when h1 is the tree height and h2 is the height of node.
+	"""
+
+	def fixTreeUp(self, node):
+		fixFlag = False
+		balancingCntr = 0
+		while node != None:
+			originalParent = node.getParent()
+			node.updateSize()
+			if not fixFlag:
+				BF = node.getBf()
+				heightBefore = node.getHeight()
+				node.updateHeight()
+				heightAfter = node.getHeight()
+				if abs(BF) < 2 and heightAfter == heightBefore:
+					fixFlag = True
+
+				elif abs(BF) < 2 and heightAfter != heightBefore:
+					balancingCntr += 1
+				else:  # abs(BF) = 2
+					if BF == 2:
+						BFL = node.getLeft().getBf()
+						if BFL == 1 or BFL == 0:
+							self.rightRotation(node)
+							balancingCntr += 1
+						elif BFL == - 1:
+							self.leftRotation(node.getLeft())
+							self.rightRotation(node)
+							balancingCntr += 2
+					else:  # BF = -2
+						BFR = node.getRight().getBf()
+						if BFR == -1 or BFR == 0:
+							self.leftRotation(node)
+							balancingCntr += 1
+						elif BFR == 1:
+							self.rightRotation(node.getRight())
+							self.leftRotation(node)
+							balancingCntr += 2
+
+			node = originalParent
+
+		return balancingCntr
 
 	"""merges two AVL trees
 	@type connector: AVL node
@@ -681,8 +738,8 @@ class AVLTreeList(object):
 			return
 
 		elif self.getRoot().getHeight() == T2.getRoot().getHeight():
-			connector.completeSetLeft(self.getRoot())
-			connector.completeSetRight(T2.getRoot())
+			connector.setLeftParent(self.getRoot())
+			connector.setRightParent(T2.getRoot())
 			connector.setParent(None)
 			self.root = connector
 
@@ -691,9 +748,9 @@ class AVLTreeList(object):
 			while curr.getHeight() > self.getRoot().getHeight():
 				curr = curr.getLeft()
 			currParent = curr.getParent()
-			connector.completeSetLeft(self.getRoot())
-			connector.completeSetRight(curr)
-			currParent.completeSetLeft(connector)
+			connector.setLeftParent(self.getRoot())
+			connector.setRightParent(curr)
+			currParent.setLeftParent(connector)
 			self.root = T2.getRoot()
 
 		else:
@@ -701,11 +758,124 @@ class AVLTreeList(object):
 			while curr.getHeight() > T2.getRoot().getHeight():
 				curr = curr.getRight()
 			currParent = curr.getParent()
-			connector.completeSetLeft(curr)
-			connector.completeSetRight(T2.getRoot())
-			currParent.completeSetRight(connector)
+			connector.setLeftParent(curr)
+			connector.setRightParent(T2.getRoot())
+			currParent.setRightParent(connector)
 		self.lastItem = T2.lastItem
 		connector.updateSize()
 		connector.updateHeight()
 		if self.getRoot() != connector:
-			self.fixTreeAfterDeletionAndJoin(connector.getParent())
+			self.fixTreeUp(connector.getParent())
+
+	def heapify(arr, N, i):
+		largest = i  # Initialize largest as root
+		l = 2 * i + 1     # left = 2*i + 1
+		r = 2 * i + 2     # right = 2*i + 2
+	
+		# See if left child of root exists and is
+		# greater than root
+		if l < N and arr[largest] < arr[l]:
+			largest = l
+	
+		# See if right child of root exists and is
+		# greater than root
+		if r < N and arr[largest] < arr[r]:
+			largest = r
+	
+		# Change root, if needed
+		if largest != i:
+			arr[i], arr[largest] = arr[largest], arr[i]  # swap
+			heapify(arr, N, largest)
+	
+	
+	def heapSort(arr):
+		N = len(arr)
+	
+		for i in range(N//2 - 1, -1, -1):
+			heapify(arr, N, i)
+	
+		for i in range(N-1, 0, -1):
+			arr[i], arr[0] = arr[0], arr[i]  # swap
+			heapify(arr, i, 0)
+
+
+	### PRINT TREE FUNCTIONS ###
+
+	def printt(self):
+		out = ""
+		for row in self.printree(self.root):  # need printree.py file
+			out = out + row + "\n"
+		print(out)
+
+	def printree(self, t, bykey=True):
+		"""Print a textual representation of t
+		bykey=True: show keys instead of values"""
+		# for row in trepr(t, bykey):
+		#        print(row)
+		return self.trepr(t, False)
+
+	def trepr(self, t, bykey=False):
+		"""Return a list of textual representations of the levels in t
+		bykey=True: show keys instead of values"""
+		if t == None:
+			return ["#"]
+
+		thistr = str(t.key) if bykey else str(t.getValue())
+
+		return self.conc(self.trepr(t.left, bykey), thistr, self.trepr(t.right, bykey))
+
+	def conc(self, left, root, right):
+		"""Return a concatenation of textual represantations of
+		a root node, its left node, and its right node
+		root is a string, and left and right are lists of strings"""
+
+		lwid = len(left[-1])
+		rwid = len(right[-1])
+		rootwid = len(root)
+
+		result = [(lwid+1)*" " + root + (rwid+1)*" "]
+
+		ls = self.leftspace(left[0])
+		rs = self.rightspace(right[0])
+		result.append(ls*" " + (lwid-ls)*"_" + "/" + rootwid *
+					" " + "\\" + rs*"_" + (rwid-rs)*" ")
+
+		for i in range(max(len(left), len(right))):
+			row = ""
+			if i < len(left):
+				row += left[i]
+			else:
+				row += lwid*" "
+
+			row += (rootwid+2)*" "
+
+			if i < len(right):
+				row += right[i]
+			else:
+				row += rwid*" "
+
+			result.append(row)
+
+		return result
+
+	def leftspace(self, row):
+		"""helper for conc"""
+		# row is the first row of a left node
+		# returns the index of where the second whitespace starts
+		i = len(row)-1
+		while row[i] == " ":
+			i -= 1
+		return i+1
+
+	def rightspace(self, row):
+		"""helper for conc"""
+		# row is the first row of a right node
+		# returns the index of where the first whitespace ends
+		i = 0
+		while row[i] == " ":
+			i += 1
+		return i
+
+
+
+			
