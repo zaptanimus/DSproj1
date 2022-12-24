@@ -207,7 +207,7 @@ class AVLTreeList(object):
 			return None
 		return self.treeSelect(i+1).getValue()
 
-	"""inserts val at position i in the list 
+	"""inserts val at position i in the list
 	@type i: int
 	@pre: 0 <= i <= self.length()
 	@param i: The intended index in the list to which we insert val
@@ -320,10 +320,11 @@ class AVLTreeList(object):
 	def sort(self):
 
 		arr = self.listToArray
-
-
-
-		return arr
+		myHeapSort(arr)
+		sortedT = AVLTreeList()
+		for i in range(len(arr)):
+			sortedT.insert(i,arr[i])
+		return sortedT
 
 	"""permute the info values of the list 
 
@@ -767,36 +768,35 @@ class AVLTreeList(object):
 		if self.getRoot() != connector:
 			self.fixTreeUp(connector.getParent())
 
-	def heapify(arr, N, i):
-		largest = i  # Initialize largest as root
-		l = 2 * i + 1     # left = 2*i + 1
-		r = 2 * i + 2     # right = 2*i + 2
+"""Heapsort algorithm using heapify as shown in class
+@type arr: array
+@complexity: O(n log n)
+"""
+
+def myHeapSort(arr):
+	def myHeapify(arr, N, i):
+		largest = i
+		l = 2 * i + 1
+		r = 2 * i + 2
 	
-		# See if left child of root exists and is
-		# greater than root
 		if l < N and arr[largest] < arr[l]:
 			largest = l
-	
-		# See if right child of root exists and is
-		# greater than root
+		
 		if r < N and arr[largest] < arr[r]:
 			largest = r
 	
-		# Change root, if needed
 		if largest != i:
 			arr[i], arr[largest] = arr[largest], arr[i]  # swap
-			heapify(arr, N, largest)
-	
-	
-	def heapSort(arr):
-		N = len(arr)
-	
-		for i in range(N//2 - 1, -1, -1):
-			heapify(arr, N, i)
-	
-		for i in range(N-1, 0, -1):
-			arr[i], arr[0] = arr[0], arr[i]  # swap
-			heapify(arr, i, 0)
+			myHeapify(arr, N, largest)
+
+	N = len(arr)
+
+	for i in range(N//2 - 1, -1, -1):
+		myHeapify(arr, N, i)
+
+	for i in range(N-1, 0, -1):
+		arr[i], arr[0] = arr[0], arr[i]  # swap
+		myHeapify(arr, i, 0)
 
 
 	### PRINT TREE FUNCTIONS ###
