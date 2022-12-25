@@ -307,8 +307,6 @@ class AVLTreeList(object):
 		delete.setParent(None)
 		return balancer
 
-
-
 	"""returns the value of the first item in the list
 
 	@rtype: str
@@ -376,10 +374,12 @@ class AVLTreeList(object):
 	def permutation(self):
 		permT = AVLTreeList()
 		arr = self.listToArray
-		random.shuffle(arr)
+		myShuffle(arr)
 		for i in range(len(arr)):
 			permT.insert(i,arr[i])
 		return permT
+
+		### MAYBE IN O(n) but needs to think about it and make changes
 
 	"""concatenates lst to self
 
@@ -922,6 +922,18 @@ class AVLTreeList(object):
 			i += 1
 		return i
 
+"""inplace shuffling
+@type arr: array
+@complexity: O(n)
+"""
+def myShuffle(arr):
+	last_index = len(arr) - 1
+	while last_index > 0:
+		rand_index = random.randint(0, last_index)
+		arr[last_index], arr[rand_index] = arr[rand_index], arr[last_index]
+		last_index -= 1
+
+	return arr
 
 """Heapsort algorithm using heapify as shown in class
 @type arr: array
@@ -944,7 +956,6 @@ def myHeapSort(arr):
 			myHeapify(arr, N, largest)
 
 	N = len(arr)
-
 	for i in range(N//2 - 1, -1, -1):
 		myHeapify(arr, N, i)
 
