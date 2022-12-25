@@ -255,7 +255,59 @@ class AVLTreeList(object):
 	@returns: the number of rebalancing operation due to AVL rebalancing
 	"""
 	def delete(self, i):
-		return -1
+		if i < 0 or i >= self.length():
+			return -1
+		
+		if self.length() == 1:
+			self.root = None
+			self.firstItem = None
+			self.lastItem = None
+			return 0
+
+		if i == 0:
+			self.firstItem = self.mySuccessor(delete)
+		
+		if i == self.length() - 1:
+			self.lastItem = self.myPredecessor(delete)
+
+		delete = self.treeSelect(i+1)
+
+		if delete.getSize() == 1:
+			balancer = self.deleteLeaf(delete)
+			return balancer
+		
+		if not (delete.getLeft().isRealNode()) or (not (delete.getRight().isRealNode())):
+			balancer = self.deleteNodeWithOneChildOnly(delete)
+			return balancer
+
+		successor = self.mySuccessor(delete)
+		if successor.size == 1:
+			balancer = self.deleteLeaf(successor)
+		else:
+			balancer = self.deleteNodeWithOneChildOnly(successor)
+		
+		parent = delete.getParent()
+		left = delete.getLeft()
+		right = delete.getRight()
+		if parent != None:
+			if parent.getLeft() == delete:
+				parent.setLeft(successor)
+			else:
+				parent.setRight(successor)
+		else:
+			self.root = successor
+
+		successor.setParent(parent)
+		successor.setLeftParent(left)
+		successor.setRightParent(right)
+		successor.updateHeight()
+		successor.updateSize()
+		delete.setLeft(None)
+		delete.setRight(None)
+		delete.setParent(None)
+		return balancer
+
+
 
 	"""returns the value of the first item in the list
 
@@ -742,6 +794,56 @@ class AVLTreeList(object):
 		connector.updateHeight()
 		if self.getRoot() != connector:
 			self.fixTreeUp(connector.getParent())
+
+
+	"""
+	deletes a leaf from the tree and returns the number of rebalalancing opps that had been done to fix the tree after the deletion
+	@type nodeToBeDeleted: AVL node
+	@param nodeToBeDeleted: A leaf which will be deleted from the tree
+	@pre: nodeToBeDeleted is not the root.
+	@rtype: int
+	@returns: the number of rebalancing operation due to AVL rebalancing
+	@complexity: O(logn)
+	"""
+	def deleteLeaf(self,delete):
+		parent = delete.getParent()
+		if parent.getLeft() == delete:
+			parent.setLeftParent(delete.getLeft())
+		else:
+			parent.setRightParent(delete.getRight())
+		delete.setParent(None)
+		balancingCntr = self.fixTreeUp(parent)
+		return balancingCntr
+	
+	""" deletes a node from the tree which has only one child as shown in class  
+	returns the number of rebalalancing opps that had been done to fix the tree after the deletion
+	@type nodeToBeDeleted: AVL node
+	@param nodeToBeDeleted: A node which has only right child and will be deleted from the tree
+	@rtype: int
+	@returns: the number of rebalancing operation due to AVL rebalancing
+	@complexity: O(logn)
+	"""
+	def deleteNodeWithOneChildOnly(self,delete):
+		parent = delete.getParent()
+		if delete.getRight().isRealNode():
+			child = delete.getRight()
+		else:
+			child = delete.getLeft()
+		child.setParent(parent)
+		if parent != None:
+			if parent.getLeft() == delete:
+				parent.setLeft(child)
+			else:
+				parent.setRight(child)
+		else:
+			self.root = child
+
+		delete.setParent(None)
+		delete.setRight(None)
+		delete.setLeft(None)
+		balancingCntr = self.fixTreeUp(parent)
+		return balancingCntr
+
 
 ### PRINT TREE FUNCTIONS ###
 
