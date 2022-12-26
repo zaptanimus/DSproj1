@@ -5,6 +5,7 @@
 #name2    - complete info
 
 import random
+import copy
 
 """A class represnting a node in an AVL tree"""
 
@@ -372,14 +373,19 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are permuted randomly by the info of the original list. ##Use Randomness
 	"""
 	def permutation(self):
-		permT = AVLTreeList()
+		i=0
+		def recPermVals(node, arr):
+			if node.isRealNode():
+				recPermVals(node.getLeft())
+				node.setValue(arr[i])
+				i += 1
+				recPermVals(node.getRight())
+
+		permT = copy.deepcopy(self)
 		arr = self.listToArray
 		myShuffle(arr)
-		for i in range(len(arr)):
-			permT.insert(i,arr[i])
+		recPermVals(permT.getRoot(),arr)
 		return permT
-
-		### MAYBE IN O(n) but needs to think about it and make changes
 
 	"""concatenates lst to self
 
@@ -794,7 +800,6 @@ class AVLTreeList(object):
 		connector.updateHeight()
 		if self.getRoot() != connector:
 			self.fixTreeUp(connector.getParent())
-
 
 	"""
 	deletes a leaf from the tree and returns the number of rebalalancing opps that had been done to fix the tree after the deletion
