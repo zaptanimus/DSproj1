@@ -160,7 +160,7 @@ class AVLNode(object):
 	"""updates node size by computing it from childrens' size
 	"""
 	def updateSize(self):
-		self.setSize(self.getRight().getSizeNode() + self.getLeft().getSizeNode() + 1)
+		self.setSizeNode(self.getRight().getSizeNode() + self.getLeft().getSizeNode() + 1)
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -273,7 +273,7 @@ class AVLTreeList(object):
 
 		delete = self.treeSelect(i+1)
 
-		if delete.getSize() == 1:
+		if delete.getSizeNode() == 1:
 			balancer = self.deleteLeaf(delete)
 			return balancer
 		
