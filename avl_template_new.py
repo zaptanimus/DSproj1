@@ -976,5 +976,4 @@ def myHeapSort(arr):
 		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
 
-def q1():
-	
+#def q1():
