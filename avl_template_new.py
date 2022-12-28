@@ -340,8 +340,11 @@ class AVLTreeList(object):
 				arr.append(node.getValue())
 				recListToArray(node.getRight(), arr)
 		
+
 		arr = []
-		recListToArray(self.getRoot(),arr)
+		if self.empty():
+			return arr
+		recListToArray(self.getRoot(), arr)
 		return arr
 
 	"""returns the size of the list 
@@ -414,12 +417,12 @@ class AVLTreeList(object):
 	@returns: the first index that contains val, -1 if not found.
 	"""
 	def search(self, val):
+		i = 0
 		traveler = self.firstItem
-		index = 0
 		while traveler != None:
 			if traveler.getValue() == val:
-				return index
-			index += 1
+				return i
+			i += 1
 			traveler = self.mySuccessor(traveler)
 		return -1
 
@@ -435,19 +438,19 @@ class AVLTreeList(object):
 
 ### service functions###
 
-	"""returns the smallest node in the tree whose subtree of size >= k
+	"""returns the smallest node that subtree of size is atleast k
 	@type k: int
 	@pre: 1 <= k <= self.length()
 	@rtype: AVLNode
 	@returns: the smallest node off size >= k
 	"""
 	def subTreeOfSizeK(self, k):
-		curr = self.firstItem
-		while (curr.getSizeNode() < k):
-			curr = curr.getParent()
-		return curr
+		traveler = self.firstItem
+		while (traveler.getSizeNode() < k):
+			traveler = traveler.getParent()
+		return traveler
 
-	"""returns the i'th smallest node in the tree
+	"""returns the i'th node in the tree
 	@type i: int
 	@pre: 1 <= i <= self.length()
 	@param i: a position in the tree
@@ -460,22 +463,22 @@ class AVLTreeList(object):
 		if i == self.length():
 			return self.lastItem
 
-		curr = self.subTreeOfSizeK(i)
-		currSize = curr.getLeft().getSizeNode() + 1
-		while (i != currSize):
-			if i < currSize:
-				curr = curr.getLeft()
+		traveler = self.subTreeOfSizeK(i)
+		travSize = traveler.getLeft().getSizeNode() + 1
+		while (i != travSize):
+			if i < travSize:
+				traveler = traveler.getLeft()
 
 			else:
-				curr = curr.getRight()
-				i = i - currSize
-			currSize = curr.getLeft().getSizeNode() + 1
-		return curr
+				traveler = traveler.getRight()
+				i = i - travSize
+			travSize = traveler.getLeft().getSizeNode() + 1
+		return traveler
 
-	"""returns the successor of a given node
+	"""returns the successor of node
 	@type node: AVLNode
 	@rtype: AVLNode
-	@returns: the successor of a given node. if the node is the Maximum returns None
+	@returns: the successor of node. if node is the maximum returns None
 	"""
 	def mySuccessor(self, node):
 		if self.lastItem == node:
@@ -486,16 +489,16 @@ class AVLTreeList(object):
 			subTree.root = node.getRight()
 			return subTree.findMin()
 
-		curr = node.getParent()
-		while (curr != None) and (curr.getRight() == node):
-			node = curr
-			curr = curr.getParent()
-		return curr
+		traveler = node.getParent()
+		while (traveler != None) and (traveler.getRight() == node):
+			node = traveler
+			traveler = traveler.getParent()
+		return traveler
 
-	"""returns the predecessor of a given node
+	"""returns the predecessor of node
 	@type node: AVLNode
 	@rtype: AVLNode
-	@returns: the predecessor of a given node. if the node is the minimum returns None
+	@returns: the predecessor of node. if the node is the minimum returns None
 	"""
 	def myPredecessor(self, node):
 		if node == self.firstItem:
@@ -505,10 +508,10 @@ class AVLTreeList(object):
 			subTree.root = node.getLeft()
 			return subTree.findMax()
 
-		curr = node.getParent()
-		while (curr != None) and (curr.getLeft() == node):
-			curr = curr.getParent
-		return curr
+		traveler = node.getParent()
+		while (traveler != None) and (traveler.getLeft() == node):
+			traveler = traveler.getParent
+		return traveler
 
 	"""returns the node which contains the last item in the AVLtreelist.
 	if empty returns None.
@@ -676,7 +679,7 @@ class AVLTreeList(object):
 		newLeaf.setRightParent(virtualSon)
 		newLeaf.setLeftParent(AVLNode())
 
-	"""	updating the size of all the nodes which are in the path from node to the root
+	"""	updating size of all nodes that are in the path from node to root
 	@type node: AVLNode
 	"""
 	def fixSizeUp(self, node):
@@ -965,7 +968,7 @@ def myHeapSort(arr):
 		myHeapify(arr, N, i)
 
 	for i in range(N-1, 0, -1):
-		arr[i], arr[0] = arr[0], arr[i]  # swap
+		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
 
 			
