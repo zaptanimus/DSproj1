@@ -377,17 +377,15 @@ class AVLTreeList(object):
 	@returns: an AVLTreeList where the values are permuted randomly by the info of the original list. ##Use Randomness
 	"""
 	def permutation(self):
-		i=0
 		def recPermVals(node, arr):
 			if node.isRealNode():
-				recPermVals(node.getLeft())
-				node.setValue(arr[i])
-				i += 1
-				recPermVals(node.getRight())
+				recPermVals(node.getLeft(), arr)
+				node.setValue(arr.pop())
+				recPermVals(node.getRight(), arr)
 		if self.empty():
 			return self
 		permT = copy.deepcopy(self)
-		arr = self.listToArray
+		arr = self.listToArray()
 		myShuffle(arr)
 		recPermVals(permT.getRoot(),arr)
 		return permT
@@ -976,4 +974,24 @@ def myHeapSort(arr):
 		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
 
-#def q1():
+def q1b():
+	random.seed(666)
+	for i in range(1,11):
+		T1 = AVLTreeList()
+		arr = []
+		sizeT1 = 1500 * (2**i)
+		for j in range (sizeT1):
+			arr.append(j)
+		random.shuffle(arr)
+		cnt = 0
+		for k in range(sizeT1):
+			T1.insert(k,arr[k])
+		T2 = T1.permutation()
+		for z in range(sizeT1):
+			cnt += T2.delete(0)
+
+		print("dels", sizeT1, "i: ", i ," cnt: ",cnt)
+
+
+
+q1b()

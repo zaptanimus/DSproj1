@@ -1,5 +1,6 @@
 """A class represnting a node in an AVL tree"""
 
+import random
 
 class AVLNode(object):
     """Constructor, you are allowed to add more fields.
@@ -1047,3 +1048,19 @@ class AVLTreeList(object):
         while row[i] == " ":
             i += 1
         return i
+
+def q1():
+	random.seed(666)
+	for i in range(1,7):
+		T1 = AVLTreeList()
+		arr = []
+		sizeT1 = 1500 * (2**i)
+		for j in range (sizeT1):
+			arr.append(j)
+		random.shuffle(arr)
+		cnt = 0
+		for k in range(sizeT1):
+			cnt += T1.insert(k,arr[k])
+		print(sizeT1, "i: ", i ," cnt: ",cnt)
+
+q1()
