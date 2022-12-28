@@ -1,1 +1,1 @@
-    emptyList = AVLTreeList()
+from avl_template_new import AVLTreeList
