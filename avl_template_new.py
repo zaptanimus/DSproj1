@@ -6,7 +6,6 @@
 
 import random
 import copy
-
 """A class represnting a node in an AVL tree"""
 
 class AVLNode(object):
@@ -21,7 +20,7 @@ class AVLNode(object):
 		self.right = None
 		self.parent = None
 		self.height = -1 # Balance factor
-		self.sizeNode = 0
+		self.size = 0
 
 	"""returns the left child
 	@rtype: AVLNode
@@ -67,8 +66,8 @@ class AVLNode(object):
 	@rtype: int
 	@returns: the size of self, 0 if the node is virtual
 	"""
-	def getSizeNode(self):
-		return self.sizeNode
+	def getSize(self):
+		return self.size
 
 	"""calculate the BF of the current node 
 
@@ -139,8 +138,8 @@ class AVLNode(object):
 	@type n: int
 	@param n: the height
 	"""
-	def setSizeNode(self, n):
-		self.sizeNode = n
+	def setSize(self, n):
+		self.size = n
 
 	"""returns whether self is not a virtual node 
 
@@ -160,7 +159,7 @@ class AVLNode(object):
 	"""updates node size by computing it from childrens' size
 	"""
 	def updateSize(self):
-		self.setSizeNode(self.getRight().getSizeNode() + self.getLeft().getSizeNode() + 1)
+		self.setSize(self.getRight().getSize() + self.getLeft().getSize() + 1)
 
 """
 A class implementing the ADT list, using an AVL tree.
@@ -265,15 +264,15 @@ class AVLTreeList(object):
 			self.lastItem = None
 			return 0
 
+		delete = self.treeSelect(i+1)
+
 		if i == 0:
 			self.firstItem = self.mySuccessor(delete)
 		
 		if i == self.length() - 1:
 			self.lastItem = self.myPredecessor(delete)
 
-		delete = self.treeSelect(i+1)
-
-		if delete.getSizeNode() == 1:
+		if delete.getSize() == 1:
 			balancer = self.deleteLeaf(delete)
 			return balancer
 		
@@ -355,7 +354,7 @@ class AVLTreeList(object):
 	def length(self):
 		if self.empty():
 			return 0
-		return self.getRoot().getSizeNode()
+		return self.getRoot().getSize()
 
 	"""sort the info values of the list
 
@@ -452,7 +451,7 @@ class AVLTreeList(object):
 	"""
 	def subTreeOfSizeK(self, k):
 		traveler = self.firstItem
-		while (traveler.getSizeNode() < k):
+		while (traveler.getSize() < k):
 			traveler = traveler.getParent()
 		return traveler
 
@@ -470,7 +469,7 @@ class AVLTreeList(object):
 			return self.lastItem
 
 		traveler = self.subTreeOfSizeK(i)
-		travSize = traveler.getLeft().getSizeNode() + 1
+		travSize = traveler.getLeft().getSize() + 1
 		while (i != travSize):
 			if i < travSize:
 				traveler = traveler.getLeft()
@@ -478,7 +477,7 @@ class AVLTreeList(object):
 			else:
 				traveler = traveler.getRight()
 				i = i - travSize
-			travSize = traveler.getLeft().getSizeNode() + 1
+			travSize = traveler.getLeft().getSize() + 1
 		return traveler
 
 	"""returns the successor of node
@@ -615,8 +614,8 @@ class AVLTreeList(object):
 		@returns: number of rebalancing operation that has been done
 	"""
 	def insertCases(self, node):
-		if node.getBf() == -2:
-			if node.getRight().getBf() == -1:
+		if node.getBF() == -2:
+			if node.getRight().getBF() == -1:
 				self.leftRotation(node)
 				return 1
 			else:
@@ -625,7 +624,7 @@ class AVLTreeList(object):
 				return 2
 
 		else:
-			if node.getLeft().getBf() == 1:
+			if node.getLeft().getBF() == 1:
 				self.rightRotation(node)
 				return 1
 			else:
@@ -651,7 +650,7 @@ class AVLTreeList(object):
 				prevHeight = curr.getHeight()
 				curr.updateHeight()
 
-				if abs(curr.getBf()) < 2:
+				if abs(curr.getBF()) < 2:
 					if prevHeight == curr.getHeight():
 						return (curr, balancer)
 					else:
@@ -729,7 +728,7 @@ class AVLTreeList(object):
 			originalParent = node.getParent()
 			node.updateSize()
 			if fixFlag:
-				BF = node.getBf()
+				BF = node.getBF()
 				preHeight = node.getHeight()
 				node.updateHeight()
 				heightAfter = node.getHeight()
@@ -740,7 +739,7 @@ class AVLTreeList(object):
 					balancingCntr += 1
 				else:  # |BF| = 2
 					if BF == -2:
-						BFRight = node.getRight().getBf()
+						BFRight = node.getRight().getBF()
 						if BFRight == -1 or BFRight == 0:
 							self.leftRotation(node)
 							balancingCntr += 1
@@ -749,7 +748,7 @@ class AVLTreeList(object):
 							self.leftRotation(node)
 							balancingCntr += 2
 					else:  # BF = 2
-						BFLeft = node.getLeft().getBf()
+						BFLeft = node.getLeft().getBF()
 						if BFLeft == 1 or BFLeft == 0:
 							self.rightRotation(node)
 							balancingCntr += 1
@@ -977,4 +976,5 @@ def myHeapSort(arr):
 		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
 
-			
+def q1():
+	
