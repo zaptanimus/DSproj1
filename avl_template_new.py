@@ -148,7 +148,7 @@ class AVLNode(object):
 	@returns: False if self is a virtual node, True otherwise.
 	"""
 	def isRealNode(self):
-		if self.setHeight == -1:
+		if self.height == -1:
 			return False
 		return True
 
@@ -364,6 +364,8 @@ class AVLTreeList(object):
 	"""
 	def sort(self):
 		sortT = AVLTreeList()
+		if self.empty():
+			return sortT
 		arr = self.listToArray
 		myHeapSort(arr)
 		for i in range(len(arr)):
@@ -383,7 +385,8 @@ class AVLTreeList(object):
 				node.setValue(arr[i])
 				i += 1
 				recPermVals(node.getRight())
-
+		if self.empty():
+			return self
 		permT = copy.deepcopy(self)
 		arr = self.listToArray
 		myShuffle(arr)
@@ -400,9 +403,12 @@ class AVLTreeList(object):
 	def concat(self, lst):
 		deltaHeight = abs(self.getTreeHeight() - lst.getTreeHeight())
 		if self.empty():
-			self.root = lst.getRoot()
-			self.firstItem = lst.firstItem
-			self.lastItem = lst.lastItem
+			if lst.empty():
+				return deltaHeight
+			else:
+				self.root = lst.getRoot()
+				self.firstItem = lst.firstItem
+				self.lastItem = lst.lastItem
 		else:
 			selfMaxi = self.lastItem
 			self.delete(self.length()-1)
@@ -705,11 +711,10 @@ class AVLTreeList(object):
 	def append(self, val):
 		return self.insert(self.length(), val)
 
-	"""
-	travels from the parent of the deleted node or the parent of the connector to tree's root, 
-	while looking for criminal AVL subtrees and handling the criminals by preforming the rotations needed.
+	""" travels from parent of deleted node or the connector to root,
+	fixing AVL subtrees if needed and preforming rotations to do so.
 	for every node in the path to the root, it updates its size and height, if needed.
-	returns the number of rebalancing operation due to AVL rebalancing.
+	returns the number of rebalancing operation.
 	
 	@type node: AVLNode
 	@param node: the parent of the deleted node or the parent of the connector
@@ -718,40 +723,41 @@ class AVLTreeList(object):
 	@complexity: O(h1 - h2 + 1) = O(logn) when h1 is the tree height and h2 is the height of node.
 	"""
 	def fixTreeUp(self, node):
-		fixFlag = False
+		fixFlag = True
 		balancingCntr = 0
 		while node != None:
 			originalParent = node.getParent()
 			node.updateSize()
-			if not fixFlag:
+			if fixFlag:
 				BF = node.getBf()
-				heightBefore = node.getHeight()
+				preHeight = node.getHeight()
 				node.updateHeight()
 				heightAfter = node.getHeight()
-				if abs(BF) < 2 and heightAfter == heightBefore:
-					fixFlag = True
+				if abs(BF) < 2 and heightAfter == preHeight:
+					fixFlag = False
 
-				elif abs(BF) < 2 and heightAfter != heightBefore:
+				elif abs(BF) < 2 and heightAfter != preHeight:
 					balancingCntr += 1
-				else:  # abs(BF) = 2
-					if BF == 2:
-						BFL = node.getLeft().getBf()
-						if BFL == 1 or BFL == 0:
-							self.rightRotation(node)
-							balancingCntr += 1
-						elif BFL == - 1:
-							self.leftRotation(node.getLeft())
-							self.rightRotation(node)
-							balancingCntr += 2
-					else:  # BF = -2
-						BFR = node.getRight().getBf()
-						if BFR == -1 or BFR == 0:
+				else:  # |BF| = 2
+					if BF == -2:
+						BFRight = node.getRight().getBf()
+						if BFRight == -1 or BFRight == 0:
 							self.leftRotation(node)
 							balancingCntr += 1
-						elif BFR == 1:
+						elif BFRight == 1:
 							self.rightRotation(node.getRight())
 							self.leftRotation(node)
 							balancingCntr += 2
+					else:  # BF = 2
+						BFLeft = node.getLeft().getBf()
+						if BFLeft == 1 or BFLeft == 0:
+							self.rightRotation(node)
+							balancingCntr += 1
+						elif BFLeft == - 1:
+							self.leftRotation(node.getLeft())
+							self.rightRotation(node)
+							balancingCntr += 2
+
 
 			node = originalParent
 
