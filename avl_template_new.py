@@ -854,74 +854,6 @@ class AVLTreeList(object):
 		balancingCntr = self.fixTreeUp(parent)
 		return balancingCntr
 
-### PRINT TREE FUNCTIONS ###
-
-	def printt(self):
-		out = ""
-		for row in self.printree(self.root):  # need printree.py file
-			out = out + row + "\n"
-		print(out)
-
-	def printree(self, t, bykey=True):
-		# for row in trepr(t, bykey):
-		#        print(row)
-		return self.trepr(t, False)
-
-	def trepr(self, t, bykey=False):
-		if t == None:
-			return ["#"]
-
-		thistr = str(t.key) if bykey else str(t.getValue())
-
-		return self.conc(self.trepr(t.left, bykey), thistr, self.trepr(t.right, bykey))
-
-	def conc(self, left, root, right):
-
-		lwid = len(left[-1])
-		rwid = len(right[-1])
-		rootwid = len(root)
-
-		result = [(lwid+1)*" " + root + (rwid+1)*" "]
-
-		ls = self.leftspace(left[0])
-		rs = self.rightspace(right[0])
-		result.append(ls*" " + (lwid-ls)*"_" + "/" + rootwid *
-						" " + "\\" + rs*"_" + (rwid-rs)*" ")
-
-		for i in range(max(len(left), len(right))):
-			row = ""
-			if i < len(left):
-				row += left[i]
-			else:
-				row += lwid*" "
-
-			row += (rootwid+2)*" "
-
-			if i < len(right):
-				row += right[i]
-			else:
-				row += rwid*" "
-
-			result.append(row)
-
-		return result
-
-	def leftspace(self, row):
-		# row is the first row of a left node
-		# returns the index of where the second whitespace starts
-		i = len(row)-1
-		while row[i] == " ":
-			i -= 1
-		return i+1
-
-	def rightspace(self, row):
-		# row is the first row of a right node
-		# returns the index of where the first whitespace ends
-		i = 0
-		while row[i] == " ":
-			i += 1
-		return i
-
 """inplace shuffling
 @type arr: array
 @complexity: O(n)
@@ -963,35 +895,27 @@ def myHeapSort(arr):
 		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
 
-def q1b():
+def q1c():
 	random.seed(666)
 	for i in range(1,11):
 		T1 = AVLTreeList()
 		arr = []
+		cntInsert = 0 
 		sizeT1 = 1500 * (2**i)
 		for j in range (sizeT1):
 			arr.append(j)
 		random.shuffle(arr)
 		cnt = 0
-		for k in range(sizeT1):
-			T1.insert(k,arr[k])
-		T2 = T1.permutation()
-		for z in range(sizeT1):
-			last_index = (sizeT1 - z)
-			cnt += T2.delete(random.randint(0, last_index))
+		for k in range(sizeT1 // 2):
+			cntInsert += T1.insert(k,arr.pop())
+		for z in range(sizeT1 // 4):
+			cnt += T1.insert(random.randint(0, (sizeT1 // 2)-2),arr.pop())
+			choose = random.randint(0, (sizeT1 // 2))
+			cnt += T1.delete(choose)
+			arr.append(choose)
 
-		print("dels", sizeT1, "i: ", i ," cnt: ",cnt)
+		print("insert n//2", sizeT1, "i: ", i ," cntInsert: ",cntInsert)
 
+		print("serugin", sizeT1, "i: ", i ," cnt: ",cnt)
 
-def q2():
-	random.seed(666)
-	nodNone = AVLNode()
-	nodNone.setValue(None)
-	T1 = AVLTreeList()
-	for i in range(5):
-		print(T1.empty())
-		T1.insert(i,None)
-		print("\n")
-	T1.printt()
-q2()
-		
+q1c()
