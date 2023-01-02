@@ -894,28 +894,3 @@ def myHeapSort(arr):
 	for i in range(N-1, 0, -1):
 		arr[i], arr[0] = arr[0], arr[i]
 		myHeapify(arr, i, 0)
-
-def q1c():
-	random.seed(666)
-	for i in range(1,11):
-		T1 = AVLTreeList()
-		arr = []
-		cntInsert = 0 
-		sizeT1 = 1500 * (2**i)
-		for j in range (sizeT1):
-			arr.append(j)
-		random.shuffle(arr)
-		cnt = 0
-		for k in range(sizeT1 // 2):
-			cntInsert += T1.insert(k,arr.pop())
-		for z in range(sizeT1 // 4):
-			cnt += T1.insert(random.randint(0, (sizeT1 // 2)-2),arr.pop())
-			choose = random.randint(0, (sizeT1 // 2))
-			cnt += T1.delete(choose)
-			arr.append(choose)
-
-		print("insert n//2", sizeT1, "i: ", i ," cntInsert: ",cntInsert)
-
-		print("serugin", sizeT1, "i: ", i ," cnt: ",cnt)
-
-q1c()
