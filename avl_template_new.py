@@ -605,7 +605,7 @@ class AVLTreeList(object):
 		@returns: number of rebalancing operation that has been done
 		"""
 
-	"""performs rotation on AVL criminal subtree so that self will be legal AVL tree
+	"""performs rotation on subtree so it will fix itself
 		@type node: AVLNode
 		@param node: the root of the AVL criminal subtree
 		@rtype : int
@@ -661,8 +661,8 @@ class AVLTreeList(object):
 
 			return (traveler, balancer)
 
-	"""inserts node as a leaf without making any height or size adjustments.
-	the adjustments will be done in insert function
+	"""inserts node as a leaf according to given direction.
+	the adjustments of height and size will be done in insert function
 	@type currLeaf: AVLNode
 	@param currLeaf: the leaf that we want to insert a new son to
 	@type newLeaf: AVLNode
@@ -703,21 +703,19 @@ class AVLTreeList(object):
 	@param val: the value we insert to the end of the list
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
-	@complexity: O(logn)
 	"""
 	def append(self, val):
 		return self.insert(self.length(), val)
 
 	""" travels from parent of deleted node or the connector to root,
-	fixing AVL subtrees if needed and preforming rotations to do so.
-	for every node in the path to the root, it updates its size and height, if needed.
+	fixing subtrees by preforming rotations if needed.
+	updates size and height for every node in the path to the root.
 	returns the number of rebalancing operation.
 	
 	@type node: AVLNode
 	@param node: the parent of the deleted node or the parent of the connector
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing.
-	@complexity: O(h1 - h2 + 1) = O(logn) when h1 is the tree height and h2 is the height of node.
 	"""
 	def fixTreeUp(self, node):
 		fixFlag = True
@@ -763,7 +761,6 @@ class AVLTreeList(object):
 	@type connector: AVL node
 	@type T2: AVL tree
 	@pre connector.isRealNode()
-	@complexity: O(abs(self.getTreeHeight() - L2.getTreeHeight()) + 1)
 	"""
 	def join(self, connector, T2):
 		if T2.empty():
@@ -806,14 +803,13 @@ class AVLTreeList(object):
 		if self.getRoot() != connector:
 			self.fixTreeUp(connector.getParent())
 
-	"""
-	deletes a leaf from the tree and returns the number of rebalalancing opps that had been done to fix the tree after the deletion
+	"""	deletes a leaf from the tree
+	returns the number of rebalancing operation.
 	@type nodeToBeDeleted: AVL node
 	@param nodeToBeDeleted: A leaf which will be deleted from the tree
 	@pre: nodeToBeDeleted is not the root.
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
-	@complexity: O(logn)
 	"""
 	def deleteLeaf(self,delete):
 		parent = delete.getParent()
@@ -826,12 +822,11 @@ class AVLTreeList(object):
 		return balancingCntr
 	
 	""" deletes a node from the tree which has only one child as shown in class  
-	returns the number of rebalalancing opps that had been done to fix the tree after the deletion
+	returns the number of rebalancing operation.
 	@type nodeToBeDeleted: AVL node
 	@param nodeToBeDeleted: A node which has only right child and will be deleted from the tree
 	@rtype: int
 	@returns: the number of rebalancing operation due to AVL rebalancing
-	@complexity: O(logn)
 	"""
 	def deleteNodeWithOneChildOnly(self,delete):
 		parent = delete.getParent()
